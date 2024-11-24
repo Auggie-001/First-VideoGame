@@ -20,8 +20,11 @@ class GameScene extends Phaser.Scene {
     preload() {
         // Load background image
         this.load.image('bg', '/assets/JOPK_Level_1_1.png')
-        this.load.image('player', '/assets/Cowboy-down.png')
+        this.load.image('player-down', '/assets/Cowboy-down.png')
         this.load.image('enemy','/assets/Enemy.png')
+        this.load.image('player-up', '/assets/Cowboy-up.png')
+        this.load.image('player-left', '/assets/Cowboy-left.png')
+        this.load.image('player-right', '/assets/Cowboy-right.png')
     }
 
     create() {
@@ -30,7 +33,7 @@ class GameScene extends Phaser.Scene {
         
         // This is loading the player and their controls 
         this.player = this.physics.add
-        .image(350,350,'player')
+        .image(350,350,'player-down')
         .setOrigin(0.5,0.5).setScale(3)
         this.player.setImmovable(true)
         this.player.body.allowGravity = false
@@ -49,12 +52,16 @@ class GameScene extends Phaser.Scene {
         const {left,right,up,down} = this.cursor
         if (left.isDown) {
             this.player.setVelocityX(-this.playerSpeed);
+            this.player.setTexture('player-left')
         } else if (right.isDown) {
             this.player.setVelocityX(this.playerSpeed);
+            this.player.setTexture('player-right')
         } else if (up.isDown) {
             this.player.setVelocityY(-this.playerSpeed);
+            this.player.setTexture('player-up')
         } else if (down.isDown) {
             this.player.setVelocityY(this.playerSpeed); 
+            this.player.setTexture('player-down')
         } else {
             this.player.setVelocity(0)
         }
