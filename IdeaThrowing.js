@@ -1,11 +1,5 @@
-/*
 
 
-
-
-
-
-*/
 import Phaser, { Physics, Scene } from 'phaser';
 import './style.css';
 
@@ -25,9 +19,9 @@ class GameScene extends Phaser.Scene {
         this.player 
         this.cursor
         this.playerSpeed = speed; 
-        this.enemy
+        this.enemies
         this.projectile 
-        this.points = 0
+        this.bullets = null
     }
 
     preload() {
@@ -40,6 +34,8 @@ class GameScene extends Phaser.Scene {
         this.load.image('player-right', '/assets/Cowboy-right.png')
         // Load enemy sprites 
         this.load.image('enemy','/assets/Enemy.png')
+        // Load the sprite of the bullet
+        this.load.image('bullet', '/assets/Bullet-1.png.png')
     }
 
     create() {
@@ -59,45 +55,85 @@ class GameScene extends Phaser.Scene {
         .setOrigin(0.5,0.5).setScale(3)
         this.player.setImmovable(true)
         this.player.body.allowGravity = false
-        this.cursor=this.input.keyboard.createCursorKeys()
+        this.cursor = this.input.keyboard.createCursorKeys();
+        this.cursor.space = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
         this.player.setCollideWorldBounds(true)
 
-        // This is to load the enemy/enemies 
-        this.enemy = this.physics.add
-        .image(20,335,'enemy')
-        .setOrigin(0.5,0.5).setScale(3)
-        this.enemy.setCollideWorldBounds(false) 
+        // Adds bullets to the game 
+        this.bullets = this.physics.add.group()
 
-        this.physics.add.overlap(this.enemy,this.player,this.enemyHit, null, this)
+        // This is to load the enemy/enemies 
+        this.enemies = this.physics.add.group()
+
+        this.time.addEvent({
+            delay: 2000,
+            callback: this.spawnEnemy,
+            callbackScope: this, 
+            loop:true 
+        });
+        // Method to detect if enemies are hit by the bullet and what action to take 
+        this.physics.add.collider(this.enemies, this.bullets, this.hitEnemy, null, this)
     }
 
     update() {
-        
-        // Player controls and any other updates it needs to have 
-        const {left,right,up,down} = this.cursor
+        const { left, right, up, down, space} = this.cursor;
         if (left.isDown) {
             this.player.setVelocityX(-this.playerSpeed);
-            this.player.setTexture('player-left')
+            this.player.setTexture('player-left');
         } else if (right.isDown) {
             this.player.setVelocityX(this.playerSpeed);
-            this.player.setTexture('player-right')
+            this.player.setTexture('player-right');
         } else if (up.isDown) {
             this.player.setVelocityY(-this.playerSpeed);
-            this.player.setTexture('player-up')
+            this.player.setTexture('player-up');
         } else if (down.isDown) {
-            this.player.setVelocityY(this.playerSpeed); 
-            this.player.setTexture('player-down')
-        } 
-        /* Eventually we'll have the shooting loigc here
-        since it'll be a part of the same control logic
-        */
-        else {
-            this.player.setVelocity(0)
+            this.player.setVelocityY(this.playerSpeed);
+            this.player.setTexture('player-down');
+        } else {
+            this.player.setVelocityX(0);
+            this.player.setVelocityY(0);
         }
-        this.physics.moveToObject(this.enemy,this.player,this.playerSpeed);
+        
+        if(space.isDown){
+            this.shootBullet()
+        }
+        this.enemies.getChildren().forEach((enemy) => {
+            this.physics.moveToObject(enemy, this.player, this.playerSpeed);
+        });
+    }
+
+    shootBullet() {
+        const bullet = this.bullets.get(this.player.x, this.player.y, 'bullet');
+        if (bullet) {
+            bullet.setActive(true).setVisible(true);
+            bullet.setScale(1);
+            bullet.body.setVelocity(0);
+    
+            if (this.player.texture.key === 'player-left') {
+                bullet.setVelocityX(-300);
+            } else if (this.player.texture.key === 'player-right') {
+                bullet.setVelocityX(300);
+            } else if (this.player.texture.key === 'player-up') {
+                bullet.setVelocityY(-300);
+            } else if (this.player.texture.key === 'player-down') {
+                bullet.setVelocityY(300);
+            }
+        }
+    }
+    
+    
+
+    hitEnemy(bullet, enemy) {
+        if (bullet) bullet.destroy();
+        if (enemy) enemy.destroy();
+    }
+    spawnEnemy() {
+        const enemy = this.enemies.create(0.5, 0.5, 'enemy')
+            .setOrigin(0.5, 0.5)
+            .setScale(3);
+        enemy.setCollideWorldBounds(true);
     }
 }
-
 
 // Phaser game configuration
 const config = {
