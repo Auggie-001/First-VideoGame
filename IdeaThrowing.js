@@ -20,11 +20,13 @@ class GameScene extends Phaser.Scene {
         this.enemies
         this.projectile 
         this.bullets = null
+        this.bgMusic
     }
 
     preload() {
         // Load background image
         this.load.image('bg', '/assets/JOPK_Level_1_1.png')
+        this.load.audio('bgMusic', '/assets/Stage 1[Music].mp3')
         // Load the player sprites 
         this.load.image('player-down', '/assets/Cowboy-down.png')
         this.load.image('player-up', '/assets/Cowboy-up.png')
@@ -47,6 +49,10 @@ class GameScene extends Phaser.Scene {
 
         this.physics.world.setBounds(CenterX, CenterY,worldHeight,worldWidth)
          
+        this.bgMusic = this.sound.add("bgMusic", {
+            volume: 0.2
+        })
+        this.bgMusic.play()
         // Load player into scene 
         this.player = this.physics.add
         .image(370,370,'player-down')
