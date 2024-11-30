@@ -1,5 +1,3 @@
-
-
 import Phaser, { Physics, Scene } from 'phaser';
 import './style.css';
 
@@ -48,15 +46,15 @@ class GameScene extends Phaser.Scene {
         const CenterY = (sizes.height-worldHeight)/2;
 
         this.physics.world.setBounds(CenterX, CenterY,worldHeight,worldWidth)
-        
+         
         // Load player into scene 
         this.player = this.physics.add
-        .image(350,350,'player-down')
+        .image(370,370,'player-down')
         .setOrigin(0.5,0.5).setScale(3)
         this.player.setImmovable(true)
         this.player.body.allowGravity = false
         this.cursor = this.input.keyboard.createCursorKeys();
-        this.cursor.space = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+        this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
         this.player.setCollideWorldBounds(true)
 
         // Adds bullets to the game 
@@ -65,9 +63,29 @@ class GameScene extends Phaser.Scene {
         // This is to load the enemy/enemies 
         this.enemies = this.physics.add.group()
 
+        //Controls the rate of spawning enemies 
+        // the ends of which are the spawn locations 
         this.time.addEvent({
-            delay: 2000,
-            callback: this.spawnEnemy,
+            delay: 3000,
+            callback:() => this.spawnEnemy(700,330),
+            callbackScope: this, 
+            loop:true 
+        });
+        this.time.addEvent({
+            delay: 4000,
+            callback:() => this.spawnEnemy(10,330),
+            callbackScope: this, 
+            loop:true 
+        });
+        this.time.addEvent({
+            delay: 3000,
+            callback:() => this.spawnEnemy(350,10),
+            callbackScope: this, 
+            loop:true 
+        });
+        this.time.addEvent({
+            delay: 4000,
+            callback:() => this.spawnEnemy(370,700),
             callbackScope: this, 
             loop:true 
         });
@@ -76,6 +94,7 @@ class GameScene extends Phaser.Scene {
     }
 
     update() {
+        // Player controls and sprite changes when needed 
         const { left, right, up, down, space} = this.cursor;
         if (left.isDown) {
             this.player.setVelocityX(-this.playerSpeed);
@@ -93,16 +112,18 @@ class GameScene extends Phaser.Scene {
             this.player.setVelocityX(0);
             this.player.setVelocityY(0);
         }
-        
-        if(space.isDown){
+        // Shooting bullets
+        if(Phaser.Input.Keyboard.JustDown(this.spacebar)){
             this.shootBullet()
         }
+        // Enemy behavior 
         this.enemies.getChildren().forEach((enemy) => {
             this.physics.moveToObject(enemy, this.player, this.playerSpeed);
         });
     }
 
     shootBullet() {
+        // Load in the bullet at the players location
         const bullet = this.bullets.get(this.player.x, this.player.y, 'bullet');
         if (bullet) {
             bullet.setActive(true).setVisible(true);
@@ -127,11 +148,11 @@ class GameScene extends Phaser.Scene {
         if (bullet) bullet.destroy();
         if (enemy) enemy.destroy();
     }
-    spawnEnemy() {
-        const enemy = this.enemies.create(0.5, 0.5, 'enemy')
+    spawnEnemy(x, y) {
+        const enemy = this.enemies.create(x, y, 'enemy')
             .setOrigin(0.5, 0.5)
             .setScale(3);
-        enemy.setCollideWorldBounds(true);
+        enemy.setCollideWorldBounds(false);
     }
 }
 
