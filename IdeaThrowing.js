@@ -75,25 +75,25 @@ class GameScene extends Phaser.Scene {
         //Controls the rate of spawning enemies 
         // the ends of which are the spawn locations 
         this.time.addEvent({
-            delay: 5000,
+            delay: 2000,
             callback:() => this.spawnEnemy(700,330),
             callbackScope: this, 
             loop:true 
         });
         this.time.addEvent({
-            delay: 4000,
+            delay: 3000,
             callback:() => this.spawnEnemy(10,330),
             callbackScope: this, 
             loop:true 
         });
         this.time.addEvent({
-            delay: 5000,
+            delay: 4000,
             callback:() => this.spawnEnemy(350,10),
             callbackScope: this, 
             loop:true 
         });
         this.time.addEvent({
-            delay: 6000,
+            delay: 1500,
             callback:() => this.spawnEnemy(370,700),
             callbackScope: this, 
             loop:true 
