@@ -21,6 +21,9 @@ class GameScene extends Phaser.Scene {
         this.projectile 
         this.bullets = null
         this.bgMusic
+        this.timedEvent 
+        this.remainingTime 
+        this.playerHit = 0
     }
 
     preload() {
@@ -42,8 +45,8 @@ class GameScene extends Phaser.Scene {
         // Add background image
         this.add.image(0, 0, 'bg').setOrigin(0,0).setScale(2.75)
 
-        const worldWidth = 550;
-        const worldHeight = 550; 
+        const worldWidth = 600;
+        const worldHeight = 600; 
         const CenterX = (sizes.width-worldWidth)/2;
         const CenterY = (sizes.height-worldHeight)/2;
 
@@ -72,7 +75,7 @@ class GameScene extends Phaser.Scene {
         //Controls the rate of spawning enemies 
         // the ends of which are the spawn locations 
         this.time.addEvent({
-            delay: 3000,
+            delay: 5000,
             callback:() => this.spawnEnemy(700,330),
             callbackScope: this, 
             loop:true 
@@ -84,19 +87,22 @@ class GameScene extends Phaser.Scene {
             loop:true 
         });
         this.time.addEvent({
-            delay: 3000,
+            delay: 5000,
             callback:() => this.spawnEnemy(350,10),
             callbackScope: this, 
             loop:true 
         });
         this.time.addEvent({
-            delay: 4000,
+            delay: 6000,
             callback:() => this.spawnEnemy(370,700),
             callbackScope: this, 
             loop:true 
         });
+
         // Method to detect if enemies are hit by the bullet and what action to take 
         this.physics.add.collider(this.enemies, this.bullets, this.hitEnemy, null, this)
+
+        this.physics.add.collider(this.player, this.enemies, this.hitPlayer, null, this)
     }
 
     update() {
@@ -160,6 +166,44 @@ class GameScene extends Phaser.Scene {
             .setScale(3);
         enemy.setCollideWorldBounds(false);
     }
+    hitPlayer(player, enemy){ 
+            this.playerHit += 1
+            enemy.destroy()
+            if(this.playerHit >= 3){
+                this.gameOver()
+            }
+    }
+
+    gameOver() {
+        // Pause the game to stop physics, movement, and other activities
+        this.physics.world.isPaused = true;
+        this.bgMusic.stop()
+    
+        // Add a background dark overlay to indicate game over
+        const overlay = this.add.graphics();
+        overlay.fillStyle(0x000000, 0.7); // Dark transparent background
+        overlay.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height);
+    
+        // Display the "Game Over" text
+        const gameOverText = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2, 'Game Over', {
+            font: '48px Arial',
+            fill: '#fff',
+            align: 'center',
+        }).setOrigin(0.5, 0.5);
+    
+        // Display restart instructions
+        const restartText = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2 + 60, 'Press R to Restart', {
+            font: '24px Arial',
+            fill: '#fff',
+            align: 'center',
+        }).setOrigin(0.5, 0.5);
+    
+        // Listen for the player to press 'R' to restart the game
+        this.input.keyboard.once('keydown-R', () => {
+            // Restart the scene by calling the same scene again
+            this.scene.restart();
+        });
+    }    
 }
 
 // Phaser game configuration
