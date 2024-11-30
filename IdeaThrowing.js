@@ -167,7 +167,7 @@ class GameScene extends Phaser.Scene {
         enemy.setCollideWorldBounds(false);
     }
     hitPlayer(player, enemy){ 
-            this.playerHit += 1
+            this.playerHit ++
             enemy.destroy()
             if(this.playerHit >= 3){
                 this.gameOver()
@@ -198,6 +198,8 @@ class GameScene extends Phaser.Scene {
             align: 'center',
         }).setOrigin(0.5, 0.5);
     
+
+        this.playerHit = 0
         // Listen for the player to press 'R' to restart the game
         this.input.keyboard.once('keydown-R', () => {
             // Restart the scene by calling the same scene again
